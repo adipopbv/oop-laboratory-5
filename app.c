@@ -3,10 +3,12 @@
 #include "tests.h"
 
 int main(){
-	MedicineList medicine_list = CreateMedicineList();
+	List medicine_list = CreateList();
+	List history = CreateList();
+	AddToList(&history, medicine_list);
 
 	TestAll();
-	RunUI(&medicine_list);
+	RunUI(&medicine_list, &history);
 
 	return 0;
 }
