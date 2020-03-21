@@ -1,10 +1,10 @@
 #pragma once
 
-#include "entities/medicine_list.h"
+#include "entities/universal_list.h"
 
 /* Deletes from a given medicine list a medicine with a given id.
  * Preconditions:
- *  medicine_list - MedicineList*, a pointer to a medicine list,
+ *  medicine_list - List*, a pointer to a medicine list,
  *  				must be a valid pointer
  *  target_id - int, the id of the medicine to be deleted
  * Postconditions: If there is a medicine in 'medicine_list' with
@@ -12,13 +12,12 @@
  * no medicine with the given id is found, the list is unaffected
  * and the value 1 is returned.
  */
-int DeleteMedicineService(MedicineList* medicine_list,
-	int target_id);
+int DeleteMedicineService(List* medicine_list, int target_id);
 
 /* Adds to a given medicine list a medicine created from given
  * properties.
  * Preconditions:
- *  medicine_list - MedicineList*, a pointer to a medicine list,
+ *  medicine_list - List*, a pointer to a medicine list,
  *  				must be a valid pointer
  *  id - int, the id of the medicine to be added
  *  name - char*, a pointer of the name of the medicine to be added
@@ -34,13 +33,12 @@ int DeleteMedicineService(MedicineList* medicine_list,
  * medicine is found, the newly created medicine is added to
  * 'medicine_list'.
  */
-int AddMedicineService(MedicineList* medicine_list, int id,
-	char* name, int concentration, int quantity);
+int AddMedicineService(List* medicine_list, int id, char* name, int concentration, int quantity);
 
 /* Modifies the name and concentration of a medicine with a given
  * id, in a given medicine list.
  * Preconditions:
- *  medicine_list - MedicineList*, a pointer to a medicine list,
+ *  medicine_list - List*, a pointer to a medicine list,
  *  				must be a valid pointer
  *  id - int, the id of the medicine to be modified
  *  new_name - char*, a pointer to the name to be assigned to the
@@ -54,17 +52,24 @@ int AddMedicineService(MedicineList* medicine_list, int id,
  * If the new values are valid, they are assigned to the matching
  * medicine.
  */
-int ModifyMedicineService(MedicineList* medicine_list, int id,
-	char* new_name, int new_concentration);
+int ModifyMedicineService(List* medicine_list, int id, char* new_name, int new_concentration);
 
 /* Sorts a given medicine list using a specified method.
  * Preconditions:
- *  medicine_list - MedicineList*, a medicine list
+ *  medicine_list - List*, a medicine list
  *  method - char, 0 for sorting by name and 1 for sorting by
  *  		 quantity
  *  reverse - char, 0 for normal order, 1 for reversed order.
  * Postconditions: 'medicine_list' is sorted using the method
  * specified by 'method' and 'reverse'.
  */
-void SortMedicineListService(MedicineList* medicine_list,
-	char field, char reverse);
+void SortListService(List* medicine_list, char field, char reverse);
+
+/* Undoes the last operation.
+ * Preconditions:
+ *  medicine_list - List*, a medicine list
+ *  history - List*, a medicine list list
+ * Postconditions: history no longer has the last medicine list
+ * in memory and medicine_list is updated to the last value it had
+ */
+int UndoLastOperationService(List* medicine_list, List* history);

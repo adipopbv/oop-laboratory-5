@@ -1,7 +1,7 @@
 #include "ui.h"
 
-#include "entities/medicine_list.h"
-#include "entities/medicine_list_iterator.h"
+#include "entities/universal_list.h"
+#include "entities/universal_list_iterator.h"
 #include "service.h"
 
 #include <stdio.h>
@@ -10,19 +10,21 @@
 
 #define BUFFERSIZE 100
 
-void GetMedicineString(Medicine medicine, char** string){
-	*string = (char*)malloc(sizeof(char) * (strlen(medicine.name) +
-		50));
-
-	sprintf(*string,
+void GetMedicineString(Medicine* medicine, char** string){
+	*string = (char*)malloc(sizeof(char) * (strlen(medicine->name) + 50));
+	sprintf(
+		*string,
 		"ID: %d\nName: %s\nConcentration: %d\nQuantity: %d",
-		medicine.id, medicine.name, medicine.concentration,
-		medicine.quantity);
+		medicine->id,
+		medicine->name,
+		medicine->concentration,
+		medicine->quantity
+	);
 }
 
 void PrintMenu(){
 	printf("~~~~~~~~~~~~~~~~~~~~\n");
-	printf("1: Add medicine\n2: Print medicine list\n3: Delete medicine\n4: Modify medicine\n5: Sort medicine list\n6: Print filtered medicine list\n0: Exit\n\nEnter option: ");
+	printf("1: Add medicine\n2: Print medicine list\n3: Delete medicine\n4: Modify medicine\n5: Sort medicine list\n6: Print filtered medicine list\n7: Undo last operation\n0: Exit\n\nEnter option: ");
 }
 
 int ReadNumber(){
@@ -35,7 +37,7 @@ int ReadNumber(){
 	return number;
 }
 
-void AddMedicine(MedicineList* medicine_list){
+void AddMedicine(List* medicine_list, List* history){
 	int id = 0, concentration = 0, quantity = 0, status;
 	char buffer[BUFFERSIZE], name[BUFFERSIZE];
 	name[0] = '\0';
@@ -56,8 +58,7 @@ void AddMedicine(MedicineList* medicine_list){
 	fgets(buffer, BUFFERSIZE, stdin);
 	sscanf(buffer, "%d", &quantity);
 
-	status = AddMedicineService(medicine_list, id, name,
-		concentration, quantity);
+	status = AddMedicineService(medicine_list, id, name, concentration, quantity);
 
 	if(status != 0){
 		printf("Validation error:\n");
@@ -77,32 +78,28 @@ void AddMedicine(MedicineList* medicine_list){
 	}
 }
 
-void PrintList(MedicineList medicine_list){
-	MedicineListIterator iterator =
-		CreateMedicineListIterator(&medicine_list);
+void PrintList(List* medicine_list){
+	ListIterator* iterator = CreateListIterator(medicine_list);
 
 	while(IteratorIsValid(iterator) == 1){
 		char* medicine_string;
-		GetMedicineString(GetElement(iterator), &medicine_string);
+		Medicine* current_medicine = (Medicine*)GetElement(iterator);
+		GetMedicineString(current_medicine, &medicine_string);
 
 		printf("%s\n\n", medicine_string);
 		free(medicine_string);
 
-		NextIterator(&iterator);
+		NextIterator(iterator);
 	}
 
+	DestroyIterator(iterator);
 	printf("\n");
 }
 
-void PrintFilteredList(MedicineList medicine_list){
-	int method = -1,
-		value = -1;
-	char buffer[BUFFERSIZE],
-		 string[BUFFERSIZE],
-		 letter = '\0';
-
-	MedicineListIterator iterator =
-		CreateMedicineListIterator(&medicine_list);
+void PrintFilteredList(List* medicine_list){
+	int method = -1, value = -1;
+	char buffer[BUFFERSIZE], string[BUFFERSIZE], letter = '\0';
+	ListIterator* iterator = CreateListIterator(medicine_list);
 
 	printf("Select filter method:\n0: Quantity less than given value\n1: Name starting with given letter\n\nEnter option: ");
 	method = ReadNumber();
@@ -126,37 +123,36 @@ void PrintFilteredList(MedicineList medicine_list){
 		fgets(buffer, BUFFERSIZE, stdin);
 		sscanf(buffer, "%s", string);
 
-		if(strlen(string) > 0){
+		if(strlen(string) > 0)
 			letter = string[0];
-		} else{
+		else{
 			printf("Invalid option\n");
 			return;
 		}
 	}
 
 	while(IteratorIsValid(iterator) == 1){
-		Medicine current_medicine = GetElement(iterator);
+		Medicine* current_medicine = (Medicine*)GetElement(iterator);
 
-		if((method == 0 &&
-			GetMedicineQuantity(current_medicine) < value) ||
-			(method == 1 &&
-			GetMedicineName(current_medicine)[0] == letter)){
+		if((method == 0 && GetMedicineQuantity(current_medicine) < value) ||
+			(method == 1 && GetMedicineName(current_medicine)[0] == letter)){
 
 			char* medicine_string;
-			GetMedicineString(current_medicine,
-				&medicine_string);
+			GetMedicineString(current_medicine, &medicine_string);
 
 			printf("%s\n\n", medicine_string);
 			free(medicine_string);
 		}
 
-		NextIterator(&iterator);
+		NextIterator(iterator);
 	}
+
+	DestroyIterator(iterator);
 
 	printf("\n");
 }
 
-void DeleteMedicine(MedicineList* medicine_list){
+void DeleteMedicine(List* medicine_list, List* history){
 	char buffer[BUFFERSIZE];
 	int target_id, status;
 
@@ -171,7 +167,7 @@ void DeleteMedicine(MedicineList* medicine_list){
 	}
 }
 
-void ModifyMedicine(MedicineList* medicine_list){
+void ModifyMedicine(List* medicine_list, List* history){
 	char buffer[BUFFERSIZE], new_name[BUFFERSIZE];
 	int target_id = -1, new_concentration = 0, status;
 	new_name[0] = '\0';
@@ -188,21 +184,17 @@ void ModifyMedicine(MedicineList* medicine_list){
 	fgets(buffer, BUFFERSIZE, stdin);
 	sscanf(buffer, "%d", &new_concentration);
 
-	status = ModifyMedicineService(medicine_list, target_id,
-		new_name, new_concentration);
+	status = ModifyMedicineService(medicine_list, target_id, new_name, new_concentration);
 
-	if(status == 1){
+	if(status == 1)
 		printf("Medicine ID not found\n");
-	}
-	if(status & 2){
+	if(status & 2)
 		printf("The name can't be empty\n");
-	}
-	if(status & 4){
+	if(status & 4)
 		printf("The concentration can't be less than or equal to 0\n");
-	}
 }
 
-void SortMedicineList(MedicineList* medicine_list){
+void SortMedicineList(List* medicine_list){
 	int field = -1, reverse = -1;
 	printf("Select the field by which to sort:\n0: Name\n1: Quantity\n\nEnter option: ");
 	field = ReadNumber();
@@ -220,15 +212,25 @@ void SortMedicineList(MedicineList* medicine_list){
 		return;
 	}
 
-	SortMedicineListService(medicine_list, field, reverse);
-	PrintList(*medicine_list);
+	SortListService(medicine_list, field, reverse);
+	PrintList(medicine_list);
 }
 
-void Cleanup(MedicineList* medicine_list){
-	DestroyMedicineList(medicine_list);
+void UndoLastOperation(List* medicine_list, List* history)
+{
+	int status = UndoLastOperationService(medicine_list, history);
+
+	if (status == 1)
+		printf("Already at oldest change!\n");
+	else
+		printf("Operation succesful!\n");
 }
 
-void RunUI(MedicineList* medicine_list){
+void Cleanup(List* medicine_list){
+	DestroyList(medicine_list);
+}
+
+void RunUI(List* medicine_list, List* history){
 	int option;
 
 	while(1){
@@ -238,22 +240,23 @@ void RunUI(MedicineList* medicine_list){
 		switch(option){
 			case 0:
 				Cleanup(medicine_list);
+				Cleanup(history);
 				return;
 
 			case 1:
-				AddMedicine(medicine_list);
+				AddMedicine(medicine_list, history);
 				break;
 
 			case 2:
-				PrintList(*medicine_list);
+				PrintList(medicine_list);
 				break;
 
 			case 3:
-				DeleteMedicine(medicine_list);
+				DeleteMedicine(medicine_list, history);
 				break;
 
 			case 4:
-				ModifyMedicine(medicine_list);
+				ModifyMedicine(medicine_list, history);
 				break;
 
 			case 5:
@@ -261,7 +264,11 @@ void RunUI(MedicineList* medicine_list){
 				break;
 
 			case 6:
-				PrintFilteredList(*medicine_list);
+				PrintFilteredList(medicine_list);
+				break;
+
+			case 7:
+				UndoLastOperation(medicine_list, history);
 				break;
 
 			default:
