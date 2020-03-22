@@ -1,5 +1,5 @@
 #pragma once
 
-#include "entities/medicine_list.h"
+#include "entities/universal_list.h"
 
-void RunUI(MedicineList* medicine_list);
+void RunUI(List* medicine_list, List* history);
