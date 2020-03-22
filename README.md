@@ -34,6 +34,6 @@ My job is to _code review_ my colegue's app and add some more functionalities:
 
 ## Solution
 
-The filled _code review_ is [here]().
+The filled _code review_ is [here](https://github.com/adipopbv/oop-laboratory-5/blob/master/CodeReviewTemplate.odt).
 
 The compiled application _executable_ is [here](https://github.com/adipopbv/oop-laboratory-5/blob/master/app)
