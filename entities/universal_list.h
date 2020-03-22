@@ -90,6 +90,7 @@ void RemoveFromList(List* list, int position, DestructionFunction destroy_item);
 /* Sorts list with the given compare function
  * Preconditions:
  *  list - List*, a pointer to a list
- *  compare_items - CompareFunction
+ *  compare_items - CompareFunction, a function for comparations
+ * Postconditions: the list is sorted
  */
 void SortList(List* list, CompareFunction compare_items);
