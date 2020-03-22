@@ -227,12 +227,8 @@ void UndoLastOperation(List** medicine_list, List* history)
 		printf("Operation succesful!\n");
 }
 
-void CleanupMedicineList(List* medicine_list){
+void CleanupMemory(List* medicine_list, List* history){
 	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
-}
-
-void CleanupHistory(List* history)
-{
 	for (int i=0; i<history->current_size; i++)
 		DeepDestroyList(history->list[i], (DestructionFunction)DestroyMedicine);
 	DestroyList(history);
@@ -247,8 +243,7 @@ void RunUI(List* medicine_list, List* history){
 
 		switch(option){
 			case 0:
-				CleanupMedicineList(medicine_list);
-				CleanupHistory(history);
+				CleanupMemory(medicine_list, history);
 				return;
 
 			case 1:

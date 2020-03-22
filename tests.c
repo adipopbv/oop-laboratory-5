@@ -9,6 +9,22 @@
 #include <string.h>
 #include <assert.h>
 
+void CleanupMedicineList(List* medicine_list){
+	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+}
+
+void CleanupHistory(List* history)
+{
+	for (int i=0; i<history->current_size; i++)
+		DeepDestroyList(history->list[i], (DestructionFunction)DestroyMedicine);
+	DestroyList(history);
+}
+
+void Cleanup(List* medicine_list, List* history){
+	CleanupMedicineList(medicine_list);
+	CleanupHistory(history);
+}
+
 void TestAddMedicineService(){
 	List* medicine_list = CreateList();
 	List* history = CreateList();
@@ -50,7 +66,7 @@ void TestAddMedicineService(){
 	assert(GetMedicineQuantity(medicine) == quantity +
 		second_quantity);
 
-	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+	Cleanup(medicine_list, history);
 	DestroyIterator(iterator);
 }
 
@@ -86,7 +102,7 @@ void TestDeleteMedicineService(){
 		== 0);
 	assert(GetListLength(medicine_list) == 0);
 
-	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+	Cleanup(medicine_list, history);
 }
 
 void TestModifyMedicineService(){
@@ -124,7 +140,7 @@ void TestModifyMedicineService(){
 	assert(GetMedicineConcentration(medicine) ==
 		second_concentration);
 
-	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+	Cleanup(medicine_list, history);
 	DestroyIterator(iterator);
 }
 
@@ -211,7 +227,7 @@ void TestSortMedicineListService(){
 		NextIterator(second_iterator);
 	}
 
-	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+	Cleanup(medicine_list, history);
 	DestroyIterator(first_iterator);
 	DestroyIterator(second_iterator);
 }
@@ -244,7 +260,7 @@ void TestListIterator(){
 	assert(IteratorIsValid(iterator) == 0);
 	assert(NextIterator(iterator) == 1);
 
-	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+	Cleanup(medicine_list, history);
 	DestroyIterator(iterator);
 }
 
@@ -263,7 +279,7 @@ void TestUndo(){
 	status = UndoLastOperationService(&medicine_list, history);
 	assert(status == 1);
 
-	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+	Cleanup(medicine_list, history);
 }
 
 void TestAll(){
