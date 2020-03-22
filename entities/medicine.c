@@ -20,7 +20,13 @@ Medicine* CreateMedicine(int id, char* name, int concentration, int quantity){
 
 void DestroyMedicine(Medicine* medicine){
 	free(medicine->name);
+	medicine->name = NULL;
 	free(medicine);
+}
+
+Medicine* CloneMedicine(Medicine* medicine){
+	Medicine* new_medicine = CreateMedicine(medicine->id, medicine->name, medicine->concentration, medicine->quantity);
+	return new_medicine;
 }
 
 int MedicineEqual(Medicine* first, Medicine* second){

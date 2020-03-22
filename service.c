@@ -6,18 +6,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-int DeleteMedicineService(List* medicine_list, int target_id){
+int DeleteMedicineService(List* medicine_list, List* history, int target_id){
 	Medicine* medicine = CreateMedicine(target_id, "", 0, 0);
-	int target_index = SearchInList(medicine_list, medicine, MedicineEqual);
+	int target_index = SearchInList(medicine_list, medicine, (MatchingFunction)MedicineEqual);
 	DestroyMedicine(medicine);
 
 	if(target_index == -1)
 		return 1;
-	RemoveFromList(medicine_list, target_index, DestroyMedicine);
+	RemoveFromList(medicine_list, target_index, (DestructionFunction)DestroyMedicine);
+
+	AddToList(history, DeepCloneList(medicine_list, (CloningFunction)CloneMedicine));
 	return 0;
 }
 
-int AddMedicineService(List* medicine_list, int id, char* name, int concentration, int quantity){
+int AddMedicineService(List* medicine_list, List* history, int id, char* name, int concentration, int quantity){
 	Medicine* new_medicine = CreateMedicine(id, name, concentration, quantity);
 
 	int validation_status = 0;
@@ -28,19 +30,21 @@ int AddMedicineService(List* medicine_list, int id, char* name, int concentratio
 		return validation_status;
 	}
 
-	int position = SearchInList(medicine_list, new_medicine, MedicineEqual);
+	int position = SearchInList(medicine_list, new_medicine, (MatchingFunction)MedicineEqual);
 	if(position != -1){
 		SetMedicineQuantity(medicine_list->list[position], 
 			GetMedicineQuantity(medicine_list->list[position]) + new_medicine->quantity);
 		DestroyMedicine(new_medicine);
 	} else 
 		AddToList(medicine_list, new_medicine);
+
+	AddToList(history, DeepCloneList(medicine_list, (CloningFunction)CloneMedicine));
 	return 0;
 }
 
-int ModifyMedicineService(List* medicine_list, int id, char* new_name, int new_concentration){
+int ModifyMedicineService(List* medicine_list, List* history, int id, char* new_name, int new_concentration){
 	Medicine* medicine = CreateMedicine(id, "", 0, 0);
-	int target_index = SearchInList(medicine_list, medicine, MedicineEqual), status = 0;
+	int target_index = SearchInList(medicine_list, medicine, (MatchingFunction)MedicineEqual), status = 0;
 	DestroyMedicine(medicine);
 
 	if(target_index == -1)
@@ -56,6 +60,8 @@ int ModifyMedicineService(List* medicine_list, int id, char* new_name, int new_c
 		SetMedicineName(medicine_list->list[target_index], new_name);
 		SetMedicineConcentration(medicine_list->list[target_index], new_concentration);
 	}
+
+	AddToList(history, DeepCloneList(medicine_list, (CloningFunction)CloneMedicine));
 	return status;
 }
 
@@ -86,30 +92,33 @@ int CompareQuantityReverse(const void* first, const void* second){
 void SortListService(List* medicine_list, char field, char reverse){
 	if(field == 0){
 		if(reverse == 0){
-			SortList(medicine_list, CompareName);
+			SortList(medicine_list, (CompareFunction)CompareName);
 			//qsort(medicine_list->list, medicine_list->current_size, sizeof(Medicine*), CompareName);
 		} else{
-			SortList(medicine_list, CompareNameReverse);
+			SortList(medicine_list, (CompareFunction)CompareNameReverse);
 			//qsort(medicine_list->list, medicine_list->current_size, sizeof(Medicine*), CompareNameReverse);
 		}
 	} else{
 		if(reverse == 0){
-			SortList(medicine_list, CompareQuantity);
+			SortList(medicine_list, (CompareFunction)CompareQuantity);
 			//qsort(medicine_list->list, medicine_list->current_size, sizeof(Medicine*), CompareQuantity);
 		} else{
-			SortList(medicine_list, CompareQuantityReverse);
+			SortList(medicine_list, (CompareFunction)CompareQuantityReverse);
 			//qsort(medicine_list->list, medicine_list->current_size, sizeof(Medicine*), CompareQuantityReverse);
 		}
 	}
 }
 
-int UndoLastOperationService(List* medicine_list, List* history)
+int UndoLastOperationService(List** medicine_list, List* history)
 {
 	if (history->current_size <= 1)
 		return 1;
 
-	DestroyList(medicine_list);
-	medicine_list = history->list[(history->current_size) - 1];
-	RemoveFromList(history, (history->current_size) - 1, DestroyList);
+	DeepDestroyList(*medicine_list, (DestructionFunction)DestroyMedicine);
+	DeepDestroyList(history->list[(history->current_size) - 1], (DestructionFunction)DestroyMedicine);
+	history->list[(history->current_size) - 1] = NULL;
+	history->current_size--;
+
+	*medicine_list = DeepCloneList(history->list[(history->current_size) - 1], (CloningFunction)CloneMedicine);
 	return 0;
 }

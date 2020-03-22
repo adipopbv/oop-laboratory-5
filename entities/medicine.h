@@ -25,6 +25,13 @@ Medicine* CreateMedicine(int id, char* name, int concentration, int quantity);
  */
 void DestroyMedicine(Medicine* medicine);
 
+/* Clones the given medicine
+ * Preconditions:
+ *  medicine - Medicine*, pointer to the medicine to be cloned
+ * Postconditions: The new medicine will be a clone of the other
+ */
+Medicine* CloneMedicine(Medicine* medicine);
+
 /* Checks equality between two medicine.
  * Preconditions:
  *  first - Medicine, a medicine

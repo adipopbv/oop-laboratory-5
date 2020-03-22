@@ -7,6 +7,7 @@ typedef void* Item;
 typedef int (*MatchingFunction)(Item, Item);
 typedef void (*DestructionFunction)(Item);
 typedef int (*CompareFunction)(Item, Item);
+typedef Item* (*CloningFunction)(Item*);
 
 
 typedef struct{
@@ -25,10 +26,28 @@ List* CreateList();
  * Preconditions:
  *  list - List*, a pointer to a medicine list,
  *  				must be a valid pointer
- * Postconditions: The contents of the list and the list itself are
+ * Postconditions: The the list itself is
  * freed.
  */
 void DestroyList(List* list);
+
+/* Destroys a list and all it's items contents.
+ * Preconditions:
+ *  list - List*, a pointer to a medicine list,
+ *  				must be a valid pointer
+ *  destroy_item - DestructionFunction, a destruction function
+ * Postconditions: The contents of the list and the list itself are
+ * freed.
+ */
+void DeepDestroyList(List* list, DestructionFunction destroy_item);
+
+/* Deep copies the given list
+ * Preconditions:
+ *  list - List*, a pointer to the list to be deep cloned
+ *  clone_item - CloningFunction, a function that clones fields of the list
+ * Postconditions: The new list is a deep copy of the given one
+ */
+List* DeepCloneList(List* list, CloningFunction clone_item);
 
 /* Gets the length of a list.
  * Preconditions:

@@ -15,6 +15,12 @@ void DestroyIterator(ListIterator* iterator)
 	free(iterator);
 }
 
+//void DeepDestroyIterator(ListIterator* iterator, DestructionFunction destroy_list)
+//{
+//	destroy_list(iterator->list);
+//	DestroyIterator(iterator);
+//}
+
 int IteratorIsValid(ListIterator* iterator){
 	if(iterator->current_element < iterator->list->current_size)
 		return 1;

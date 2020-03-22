@@ -5,9 +5,9 @@
 int main(){
 	List* medicine_list = CreateList();
 	List* history = CreateList();
-	AddToList(history, medicine_list);
+	AddToList(history, DeepCloneList(medicine_list, (CloningFunction)CloneMedicine));
 
-	//TestAll();
+	TestAll();
 	RunUI(medicine_list, history);
 
 	return 0;

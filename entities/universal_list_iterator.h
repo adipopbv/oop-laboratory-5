@@ -26,6 +26,16 @@ ListIterator* CreateListIterator(List* list);
  */
 void DestroyIterator(ListIterator* iterator);
 
+/* Destroys an iterator and all of it's list values.
+ * Preconditions:
+ *  iterator - ListIterator*, pointer to the iterator to be deleted,
+ *  		   must be a valid pointer
+ *  destroy_item - DestructionFunction, a destruction function
+ * Postconditions: The iterator at the given pointer will be
+ * freed and the list.
+ */
+void DeepDestroyIterator(ListIterator* iterator, DestructionFunction destroy_list);
+
 /* Checks if a given iterator is valid.
  * Preconditions:
  * 	iterator - ListIterator, an iterator

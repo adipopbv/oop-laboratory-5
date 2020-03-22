@@ -58,7 +58,7 @@ void AddMedicine(List* medicine_list, List* history){
 	fgets(buffer, BUFFERSIZE, stdin);
 	sscanf(buffer, "%d", &quantity);
 
-	status = AddMedicineService(medicine_list, id, name, concentration, quantity);
+	status = AddMedicineService(medicine_list, history, id, name, concentration, quantity);
 
 	if(status != 0){
 		printf("Validation error:\n");
@@ -99,7 +99,6 @@ void PrintList(List* medicine_list){
 void PrintFilteredList(List* medicine_list){
 	int method = -1, value = -1;
 	char buffer[BUFFERSIZE], string[BUFFERSIZE], letter = '\0';
-	ListIterator* iterator = CreateListIterator(medicine_list);
 
 	printf("Select filter method:\n0: Quantity less than given value\n1: Name starting with given letter\n\nEnter option: ");
 	method = ReadNumber();
@@ -131,6 +130,8 @@ void PrintFilteredList(List* medicine_list){
 		}
 	}
 
+	ListIterator* iterator = CreateListIterator(medicine_list);
+
 	while(IteratorIsValid(iterator) == 1){
 		Medicine* current_medicine = (Medicine*)GetElement(iterator);
 
@@ -160,7 +161,7 @@ void DeleteMedicine(List* medicine_list, List* history){
 	fgets(buffer, BUFFERSIZE, stdin);
 	sscanf(buffer, "%d", &target_id);
 
-	status = DeleteMedicineService(medicine_list, target_id);
+	status = DeleteMedicineService(medicine_list, history, target_id);
 
 	if(status == 1){
 		printf("Medicine with specified ID not found\n");
@@ -184,7 +185,7 @@ void ModifyMedicine(List* medicine_list, List* history){
 	fgets(buffer, BUFFERSIZE, stdin);
 	sscanf(buffer, "%d", &new_concentration);
 
-	status = ModifyMedicineService(medicine_list, target_id, new_name, new_concentration);
+	status = ModifyMedicineService(medicine_list, history, target_id, new_name, new_concentration);
 
 	if(status == 1)
 		printf("Medicine ID not found\n");
@@ -216,7 +217,7 @@ void SortMedicineList(List* medicine_list){
 	PrintList(medicine_list);
 }
 
-void UndoLastOperation(List* medicine_list, List* history)
+void UndoLastOperation(List** medicine_list, List* history)
 {
 	int status = UndoLastOperationService(medicine_list, history);
 
@@ -226,8 +227,15 @@ void UndoLastOperation(List* medicine_list, List* history)
 		printf("Operation succesful!\n");
 }
 
-void Cleanup(List* medicine_list){
-	DestroyList(medicine_list);
+void CleanupMedicineList(List* medicine_list){
+	DeepDestroyList(medicine_list, (DestructionFunction)DestroyMedicine);
+}
+
+void CleanupHistory(List* history)
+{
+	for (int i=0; i<history->current_size; i++)
+		DeepDestroyList(history->list[i], (DestructionFunction)DestroyMedicine);
+	DestroyList(history);
 }
 
 void RunUI(List* medicine_list, List* history){
@@ -239,8 +247,8 @@ void RunUI(List* medicine_list, List* history){
 
 		switch(option){
 			case 0:
-				Cleanup(medicine_list);
-				Cleanup(history);
+				CleanupMedicineList(medicine_list);
+				CleanupHistory(history);
 				return;
 
 			case 1:
@@ -268,7 +276,7 @@ void RunUI(List* medicine_list, List* history){
 				break;
 
 			case 7:
-				UndoLastOperation(medicine_list, history);
+				UndoLastOperation(&medicine_list, history);
 				break;
 
 			default:

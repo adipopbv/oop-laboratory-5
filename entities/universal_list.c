@@ -18,11 +18,27 @@ List* CreateList(){
 }
 
 void DestroyList(List* list){
-//	for(int i = 0; i < list->current_size; i++){
-//		DestroyMedicine(&(list->list[i]));
-//	}
-
 	free(list->list);
+	list->list = NULL;
+	free(list);
+}
+
+void DeepDestroyList(List* list, DestructionFunction destroy_item){
+	for(int i = 0; i < list->current_size; i++){
+		destroy_item(list->list[i]);
+		list->list[i] = NULL;
+	}
+	DestroyList(list);
+}
+
+List* DeepCloneList(List* list, CloningFunction clone_item){
+	List* new_list = CreateList();
+	for (int i=0; i<list->current_size; i++)
+	{
+		Item* item = clone_item(list->list[i]);
+		AddToList(new_list, item);
+	}
+	return new_list;
 }
 
 int GetListLength(List* list){
@@ -55,8 +71,8 @@ void AddToList(List* list, Item new_item){
 	list->list[(list->current_size)++] = new_item;
 }
 
-void RemoveFromList(List* list, int position, DestructionFunction destory_item){
-	destory_item(list->list[position]);
+void RemoveFromList(List* list, int position, DestructionFunction destroy_item){
+	destroy_item(list->list[position]);
 
 	for(int i = position; i < list->current_size - 1; i++)
 		list->list[i] = list->list[i + 1];
@@ -68,7 +84,7 @@ void SortList(List* medicine_list, CompareFunction compare_items)
 {
 	for (int i=0; i<medicine_list->current_size-1; i++)
 		for (int j=i+1; j<medicine_list->current_size; j++)
-			if (compare_items(medicine_list->list[i], medicine_list->list[j]) == 1)
+			if (compare_items(medicine_list->list[i], medicine_list->list[j]) > 0)
 			{
 				Medicine* aux = medicine_list->list[i];
 				medicine_list->list[i] = medicine_list->list[j];

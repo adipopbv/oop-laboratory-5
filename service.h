@@ -12,7 +12,7 @@
  * no medicine with the given id is found, the list is unaffected
  * and the value 1 is returned.
  */
-int DeleteMedicineService(List* medicine_list, int target_id);
+int DeleteMedicineService(List* medicine_list, List* history, int target_id);
 
 /* Adds to a given medicine list a medicine created from given
  * properties.
@@ -33,7 +33,7 @@ int DeleteMedicineService(List* medicine_list, int target_id);
  * medicine is found, the newly created medicine is added to
  * 'medicine_list'.
  */
-int AddMedicineService(List* medicine_list, int id, char* name, int concentration, int quantity);
+int AddMedicineService(List* medicine_list, List* history, int id, char* name, int concentration, int quantity);
 
 /* Modifies the name and concentration of a medicine with a given
  * id, in a given medicine list.
@@ -52,7 +52,7 @@ int AddMedicineService(List* medicine_list, int id, char* name, int concentratio
  * If the new values are valid, they are assigned to the matching
  * medicine.
  */
-int ModifyMedicineService(List* medicine_list, int id, char* new_name, int new_concentration);
+int ModifyMedicineService(List* medicine_list, List* history, int id, char* new_name, int new_concentration);
 
 /* Sorts a given medicine list using a specified method.
  * Preconditions:
@@ -72,4 +72,4 @@ void SortListService(List* medicine_list, char field, char reverse);
  * Postconditions: history no longer has the last medicine list
  * in memory and medicine_list is updated to the last value it had
  */
-int UndoLastOperationService(List* medicine_list, List* history);
+int UndoLastOperationService(List** medicine_list, List* history);
