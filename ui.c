@@ -100,10 +100,10 @@ void PrintFilteredList(List* medicine_list){
 	int method = -1, value = -1;
 	char buffer[BUFFERSIZE], string[BUFFERSIZE], letter = '\0';
 
-	printf("Select filter method:\n0: Quantity less than given value\n1: Name starting with given letter\n\nEnter option: ");
+	printf("Select filter method:\n0: Quantity less than given value\n1: Name starting with given letter\n2: Concentration more than given value\n\nEnter option: ");
 	method = ReadNumber();
 
-	if(method < 0 || method > 1){
+	if(method < 0 || method > 2){
 		printf("Invalid option\n");
 		return;
 	}
@@ -116,7 +116,7 @@ void PrintFilteredList(List* medicine_list){
 			printf("Invalid option\n");
 			return;
 		}
-	} else{
+	} else if(method == 1){
 		printf("Enter starting letter: ");
 
 		fgets(buffer, BUFFERSIZE, stdin);
@@ -128,6 +128,14 @@ void PrintFilteredList(List* medicine_list){
 			printf("Invalid option\n");
 			return;
 		}
+	} else{
+		printf("Enter value: ");
+		value = ReadNumber();
+
+		if(value < 0){
+			printf("Invalid option\n");
+			return;
+		}
 	}
 
 	ListIterator* iterator = CreateListIterator(medicine_list);
@@ -136,7 +144,8 @@ void PrintFilteredList(List* medicine_list){
 		Medicine* current_medicine = (Medicine*)GetElement(iterator);
 
 		if((method == 0 && GetMedicineQuantity(current_medicine) < value) ||
-			(method == 1 && GetMedicineName(current_medicine)[0] == letter)){
+			(method == 1 && GetMedicineName(current_medicine)[0] == letter) ||
+			(method == 2 && GetMedicineConcentration(current_medicine) > value)){
 
 			char* medicine_string;
 			GetMedicineString(current_medicine, &medicine_string);
